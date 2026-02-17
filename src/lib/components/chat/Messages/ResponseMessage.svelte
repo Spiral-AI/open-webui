@@ -56,6 +56,9 @@
 	import ContentRenderer from './ContentRenderer.svelte';
 	import { KokoroWorker } from '$lib/workers/KokoroWorker';
 	import FileItem from '$lib/components/common/FileItem.svelte';
+	import { chatterConfig, chatterEnabled } from '$lib/stores/chatter';
+	import { parseChatterResponse } from '$lib/chatter';
+	import ChatterMessageDisplay from '$lib/components/chat/chatter/ChatterMessageDisplay.svelte';
 	import FollowUps from './ResponseMessage/FollowUps.svelte';
 	import { fade } from 'svelte/transition';
 	import { flyAndScale } from '$lib/utils/transitions';
@@ -772,45 +775,57 @@
 							{:else if message.content && message.error !== true}
 								<!-- always show message contents even if there's an error -->
 								<!-- unless message.error === true which is legacy error handling, where the error message is stored in message.content -->
-								<ContentRenderer
-									id={`${chatId}-${message.id}`}
-									messageId={message.id}
-									{history}
-									{selectedModels}
-									content={message.content}
-									sources={message.sources}
-									floatingButtons={message?.done &&
-										!readOnly &&
-										($settings?.showFloatingActionButtons ?? true)}
-									save={!readOnly}
-									preview={!readOnly}
-									{editCodeBlock}
-									{topPadding}
-									done={($settings?.chatFadeStreamingText ?? true)
-										? (message?.done ?? false)
-										: true}
-									{model}
-									onTaskClick={async (e) => {
-										console.log(e);
-									}}
-									onSourceClick={async (id) => {
-										console.log(id);
+								{#if $chatterEnabled && /\[(chara|intent|reflection|utterance)[:\]]/.test(message.content)}
+									{@const parsed = parseChatterResponse(message.content, $chatterConfig.schemaName)}
+									<ChatterMessageDisplay
+										turns={parsed.turns}
+										config={$chatterConfig}
+										streaming={!message.done}
+										{chatId}
+										messageId={message.id}
+										rawContent={parsed.rawContent}
+									/>
+								{:else}
+									<ContentRenderer
+										id={`${chatId}-${message.id}`}
+										messageId={message.id}
+										{history}
+										{selectedModels}
+										content={message.content}
+										sources={message.sources}
+										floatingButtons={message?.done &&
+											!readOnly &&
+											($settings?.showFloatingActionButtons ?? true)}
+										save={!readOnly}
+										preview={!readOnly}
+										{editCodeBlock}
+										{topPadding}
+										done={($settings?.chatFadeStreamingText ?? true)
+											? (message?.done ?? false)
+											: true}
+										{model}
+										onTaskClick={async (e) => {
+											console.log(e);
+										}}
+										onSourceClick={async (id) => {
+											console.log(id);
 
-										if (citationsElement) {
-											citationsElement?.showSourceModal(id);
-										}
-									}}
-									onAddMessages={({ modelId, parentId, messages }) => {
-										addMessages({ modelId, parentId, messages });
-									}}
-									onSave={({ raw, oldContent, newContent }) => {
-										history.messages[message.id].content = history.messages[
-											message.id
-										].content.replace(raw, raw.replace(oldContent, newContent));
+											if (citationsElement) {
+												citationsElement?.showSourceModal(id);
+											}
+										}}
+										onAddMessages={({ modelId, parentId, messages }) => {
+											addMessages({ modelId, parentId, messages });
+										}}
+										onSave={({ raw, oldContent, newContent }) => {
+											history.messages[message.id].content = history.messages[
+												message.id
+											].content.replace(raw, raw.replace(oldContent, newContent));
 
-										updateChat();
-									}}
-								/>
+											updateChat();
+										}}
+									/>
+								{/if}
 							{/if}
 
 							{#if message?.error}

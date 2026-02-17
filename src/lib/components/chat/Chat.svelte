@@ -85,6 +85,10 @@
 	import { getFunctions } from '$lib/apis/functions';
 	import { updateFolderById } from '$lib/apis/folders';
 
+	import { chatterEnabled, chatterConfig, activeTalkTo, lastChatterPayload } from '$lib/stores/chatter';
+	import { serializeChatterMessage, buildChatterSystemPromptAPI } from '$lib/apis/chatter';
+	import ChatterPayloadViewer from '$lib/components/chat/chatter/ChatterPayloadViewer.svelte';
+
 	import Banner from '../common/Banner.svelte';
 	import MessageInput from '$lib/components/chat/MessageInput.svelte';
 	import Messages from '$lib/components/chat/Messages.svelte';
@@ -1709,13 +1713,27 @@
 		messageInput?.setText('');
 
 		// Create user message
+		let userMessageContent = userPrompt;
+		if ($chatterEnabled && $chatterConfig) {
+			try {
+				userMessageContent = await serializeChatterMessage(localStorage.token, {
+					schema_name: $chatterConfig.schemaName,
+					text: userPrompt,
+					domain: $chatterConfig.domain.id,
+					chara_id: $chatterConfig.activeUserCharaId
+				});
+			} catch (e) {
+				console.error('Chatter serialization failed, using plain text:', e);
+			}
+		}
+
 		let userMessageId = uuidv4();
 		let userMessage = {
 			id: userMessageId,
 			parentId: messages.length !== 0 ? messages.at(-1).id : null,
 			childrenIds: [],
 			role: 'user',
-			content: userPrompt,
+			content: userMessageContent,
 			files: _files.length > 0 ? _files : undefined,
 			timestamp: Math.floor(Date.now() / 1000), // Unix epoch
 			models: selectedModels
@@ -1961,11 +1979,30 @@
 			params?.stream_response ??
 			true;
 
+		// Build system prompt, prepending chatter [cast] block if enabled
+		let _systemContent = params?.system ?? $settings?.system ?? '';
+		if ($chatterEnabled && $chatterConfig) {
+			try {
+				const chatterSystem = await buildChatterSystemPromptAPI(localStorage.token, {
+					schema_name: $chatterConfig.schemaName,
+					characters: $chatterConfig.characters.map((c) => ({
+						id: c.id,
+						description: c.description
+					})),
+					scenario: $chatterConfig.scenario,
+					domain: $chatterConfig.domain.id
+				});
+				_systemContent = chatterSystem + (_systemContent ? '\n' + _systemContent : '');
+			} catch (e) {
+				console.error('Chatter system prompt generation failed:', e);
+			}
+		}
+
 		let messages = [
-			params?.system || $settings.system
+			_systemContent
 				? {
 						role: 'system',
-						content: `${params?.system ?? $settings?.system ?? ''}`
+						content: _systemContent
 					}
 				: undefined,
 			..._messages.map((message) => ({
@@ -2056,6 +2093,10 @@
 				}
 				return message;
 			});
+		}
+
+		if ($chatterEnabled) {
+			lastChatterPayload.set(JSON.parse(JSON.stringify(messages)));
 		}
 
 		const res = await generateOpenAIChatCompletion(
@@ -2648,6 +2689,10 @@
 									/>
 								</div>
 							</div>
+
+							{#if $chatterEnabled}
+								<ChatterPayloadViewer />
+							{/if}
 
 							<div class=" pb-2 z-10">
 								<MessageInput

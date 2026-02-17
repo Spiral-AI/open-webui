@@ -15,6 +15,9 @@
 	import Markdown from './Markdown.svelte';
 	import Image from '$lib/components/common/Image.svelte';
 	import DeleteConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
+	import { chatterConfig, chatterEnabled } from '$lib/stores/chatter';
+	import { parseChatterResponse } from '$lib/chatter';
+	import ChatterMessageDisplay from '$lib/components/chat/chatter/ChatterMessageDisplay.svelte';
 
 	import localizedFormat from 'dayjs/plugin/localizedFormat';
 
@@ -367,12 +370,24 @@
 								: ' w-full'}"
 						>
 							{#if message.content}
-								<Markdown
-									id={`${chatId}-${message.id}`}
-									content={message.content}
-									{editCodeBlock}
-									{topPadding}
-								/>
+								{#if $chatterEnabled && /\[(chara|intent|reflection|utterance)[:\]]/.test(message.content)}
+									{@const parsed = parseChatterResponse(message.content, $chatterConfig.schemaName)}
+									<ChatterMessageDisplay
+										turns={parsed.turns}
+										config={$chatterConfig}
+										isUser={true}
+										{chatId}
+										messageId={message.id}
+										rawContent={parsed.rawContent}
+									/>
+								{:else}
+									<Markdown
+										id={`${chatId}-${message.id}`}
+										content={message.content}
+										{editCodeBlock}
+										{topPadding}
+									/>
+								{/if}
 							{/if}
 						</div>
 					</div>

@@ -1,4 +1,99 @@
-# Open WebUI 👋
+# Open WebUI (Spiral-AI fork)
+
+## 開発環境セットアップ
+
+### 前提条件
+
+| ツール | バージョン |
+|--------|-----------|
+| Node.js | 18.13.0 ~ 22.x |
+| Python | 3.11+ |
+| Ollama | 最新版 (localhost:11434 で起動) |
+
+### 初回セットアップ
+
+```bash
+# 1. フロントエンド依存のインストール
+npm install
+
+# 2. バックエンドの仮想環境を作成・有効化
+cd backend
+python -m venv venv
+source venv/bin/activate    # Windows: venv\Scripts\activate
+
+# 3. バックエンド依存のインストール（chatter含む）
+pip install -r requirements.txt
+
+cd ..
+```
+
+### 開発サーバーの起動
+
+ターミナルを2つ開いて、それぞれで以下を実行する。
+
+**ターミナル1 - フロントエンド (Vite dev server)**
+
+```bash
+npm run dev
+# → http://localhost:5173 でアクセス
+```
+
+**ターミナル2 - バックエンド (FastAPI + Uvicorn)**
+
+```bash
+cd backend
+source venv/bin/activate
+bash dev.sh
+# → http://localhost:8080 でAPIが起動
+```
+
+ブラウザで http://localhost:5173 を開く。
+
+### Chatter API の動作確認
+
+バックエンドが起動した状態で（認証トークンが必要）:
+
+```bash
+# スキーマ一覧の取得
+curl -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/v1/chatter/schemas
+
+# ユーザーメッセージのシリアライズ
+curl -X POST http://localhost:8080/api/v1/chatter/serialize \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"schema_name":"geppetto2-v3","text":"こんにちは","domain":"daily","chara_id":"user1"}'
+# → {"result":"[domain:daily][chara:user1][utterance]こんにちは[/utterance]"}
+
+# システムプロンプトの生成
+curl -X POST http://localhost:8080/api/v1/chatter/system-prompt \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"schema_name":"geppetto2-v3","characters":[{"id":"mama","description":"優しいお母さん","emotions":["happy_medium"]}],"scenario":"日常の会話","domain":"daily"}'
+```
+
+### 主要ディレクトリ
+
+```
+open-webui/
+├── src/                         # フロントエンド (Svelte + TypeScript)
+│   └── lib/
+│       ├── apis/chatter/        # Chatter API クライアント
+│       ├── chatter/             # パーサー・型定義
+│       ├── components/chat/
+│       │   └── chatter/         # Chatter UI コンポーネント
+│       └── stores/chatter.ts    # Chatter ストア
+├── backend/                     # バックエンド (FastAPI)
+│   ├── open_webui/routers/
+│   │   └── chatter.py           # Chatter API エンドポイント
+│   ├── requirements.txt
+│   ├── dev.sh                   # 開発用起動スクリプト
+│   └── venv/                    # Python仮想環境
+└── package.json
+```
+
+---
+
+# Open WebUI (upstream) 👋
 
 ![GitHub stars](https://img.shields.io/github/stars/open-webui/open-webui?style=social)
 ![GitHub forks](https://img.shields.io/github/forks/open-webui/open-webui?style=social)

@@ -207,6 +207,8 @@ type Settings = {
 	ctrlEnterToSend?: boolean;
 	renderMarkdownInPreviews?: boolean;
 
+	chatter?: import('$lib/chatter').ChatterConfig;
+
 	system?: string;
 	seed?: number;
 	temperature?: string;

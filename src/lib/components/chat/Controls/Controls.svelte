@@ -8,6 +8,7 @@
 	import Valves from '$lib/components/chat/Controls/Valves.svelte';
 	import FileItem from '$lib/components/common/FileItem.svelte';
 	import Collapsible from '$lib/components/common/Collapsible.svelte';
+	import ChatterConfigPanel from '$lib/components/chat/chatter/ChatterConfigPanel.svelte';
 
 	import { user, settings } from '$lib/stores';
 	export let models = [];
@@ -89,6 +90,10 @@
 
 				<hr class="my-2 border-gray-50 dark:border-gray-700/10" />
 			{/if}
+
+			<ChatterConfigPanel />
+
+			<hr class="my-2 border-gray-50 dark:border-gray-700/10" />
 
 			{#if $user?.role === 'admin' || ($user?.permissions.chat?.params ?? true)}
 				<Collapsible title={$i18n.t('Advanced Params')} open={true} buttonClassName="w-full">

@@ -91,6 +91,9 @@
 	import InputModal from '../common/InputModal.svelte';
 	import Expand from '../icons/Expand.svelte';
 	import QueuedMessageItem from './MessageInput/QueuedMessageItem.svelte';
+	import ChatterToggle from './chatter/ChatterToggle.svelte';
+	import ChatterInputControls from './chatter/ChatterInputControls.svelte';
+	import { chatterEnabled } from '$lib/stores/chatter';
 
 	const i18n = getContext('i18n');
 
@@ -1723,6 +1726,12 @@
 													</div>
 												</button>
 											</Tooltip>
+										{/if}
+
+										<ChatterToggle />
+
+										{#if $chatterEnabled}
+											<ChatterInputControls />
 										{/if}
 									</div>
 								</div>
