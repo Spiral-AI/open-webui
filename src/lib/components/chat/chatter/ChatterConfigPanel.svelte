@@ -120,13 +120,10 @@
 	}
 
 	function addCharacter() {
-		// Pick next available chara ID from schema
-		const usedIds = new Set(config.characters.map((c) => c.id));
-		const nextId = schemaCharaIds.find((id) => !usedIds.has(id)) ?? '';
 		config.characters = [
 			...config.characters,
 			{
-				id: nextId,
+				id: '',
 				name: '',
 				description: '',
 				role: 'assistant',

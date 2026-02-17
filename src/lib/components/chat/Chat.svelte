@@ -2691,7 +2691,9 @@
 							</div>
 
 							{#if $chatterEnabled}
-								<ChatterPayloadViewer />
+								<div class="px-4 py-2">
+									<ChatterPayloadViewer />
+								</div>
 							{/if}
 
 							<div class=" pb-2 z-10">

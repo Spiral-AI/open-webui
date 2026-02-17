@@ -5,7 +5,7 @@
 </script>
 
 {#if $lastChatterPayload.length > 0}
-	<div class="chatter-payload-viewer w-full">
+	<div class="chatter-payload-viewer w-full relative">
 		<button
 			type="button"
 			class="flex items-center gap-1.5 text-[11px] text-gray-400 hover:text-violet-500 dark:hover:text-violet-300 transition-colors py-1"
@@ -27,9 +27,11 @@
 		</button>
 
 		{#if open}
-			<pre
-				class="text-[11px] bg-gray-50 dark:bg-gray-800/80 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap break-all max-h-64 overflow-y-auto border border-gray-200/50 dark:border-gray-700/50 leading-relaxed text-gray-600 dark:text-gray-300 font-mono"
-			>{JSON.stringify($lastChatterPayload, null, 2)}</pre>
+			<div class="absolute bottom-full left-0 right-0 mb-1 z-50">
+				<pre
+					class="text-[11px] bg-gray-50 dark:bg-gray-800/95 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap break-all max-h-60 overflow-y-auto border border-gray-200 dark:border-gray-700 leading-relaxed text-gray-600 dark:text-gray-300 font-mono shadow-lg"
+				>{JSON.stringify($lastChatterPayload, null, 2)}</pre>
+			</div>
 		{/if}
 	</div>
 {/if}
