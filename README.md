@@ -27,9 +27,40 @@ pip install -r requirements.txt
 cd ..
 ```
 
-### 開発サーバーの起動
+### 起動方法
+
+#### Docker Compose（推奨）
+
+Ollama + Open WebUI をまとめて起動できる。
+
+```bash
+docker-compose up -d
+# → http://localhost:3000 でアクセス
+```
+
+> **注意**: ポート 3000 が他のサービスで使用中の場合は、別のポートを指定する。
+> ```bash
+> OPEN_WEBUI_PORT=3001 docker-compose up -d
+> ```
+
+停止:
+
+```bash
+docker-compose down
+# データ（アカウント・チャット履歴等）はボリュームに保存されるため維持される
+# 完全リセットする場合: docker-compose down -v
+```
+
+モデルのダウンロード:
+
+```bash
+docker exec ollama ollama pull llama3.2
+```
+
+#### ローカル開発サーバー
 
 ターミナルを2つ開いて、それぞれで以下を実行する。
+Ollama が localhost:11434 で起動済みであること。
 
 **ターミナル1 - フロントエンド (Vite dev server)**
 
