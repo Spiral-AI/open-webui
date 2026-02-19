@@ -155,4 +155,4 @@ opentelemetry-instrumentation-logging==0.60b1
 opentelemetry-instrumentation-httpx==0.60b1
 opentelemetry-instrumentation-aiohttp-client==0.60b1
 
-chatter @ file:///Users/ksterx/Documents/Development/repos/github.com/Spiral-AI/chatter
+## chatter is installed separately in Dockerfile via additional_contexts

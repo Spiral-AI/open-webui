@@ -40,6 +40,7 @@ RUN npm ci --force
 
 COPY . .
 ENV APP_BUILD_HASH=${BUILD_HASH}
+ENV NODE_OPTIONS=--max-old-space-size=4096
 RUN npm run build
 
 ######## WebUI backend ########
@@ -133,6 +134,7 @@ RUN apt-get update && \
 
 # install python dependencies
 COPY --chown=$UID:$GID ./backend/requirements.txt ./requirements.txt
+COPY --from=chatter --chown=$UID:$GID . /tmp/chatter
 
 RUN pip3 install --no-cache-dir uv && \
     if [ "$USE_CUDA" = "true" ]; then \
@@ -156,6 +158,7 @@ RUN pip3 install --no-cache-dir uv && \
     python -c "import nltk; nltk.download('punkt_tab')"; \
     fi; \
     fi; \
+    uv pip install --system /tmp/chatter --no-cache-dir && \
     mkdir -p /app/backend/data && chown -R $UID:$GID /app/backend/data/ && \
     rm -rf /var/lib/apt/lists/*;
 

@@ -33,14 +33,20 @@ cd ..
 
 Ollama + Open WebUI をまとめて起動できる。
 
+**前提**: [chatter](https://github.com/Spiral-AI/chatter) リポジトリがローカルにクローンされていること。デフォルトでは `open-webui` の隣（`../chatter`）にある前提でビルドされる。
+
 ```bash
-docker-compose up -d
+# chatter が ../chatter にある場合（デフォルト）
+docker compose up --build -d
 # → http://localhost:3000 でアクセス
+
+# chatter が別の場所にある場合
+CHATTER_PATH=/path/to/chatter docker compose up --build -d
 ```
 
 > **注意**: ポート 3000 が他のサービスで使用中の場合は、別のポートを指定する。
 > ```bash
-> OPEN_WEBUI_PORT=3001 docker-compose up -d
+> OPEN_WEBUI_PORT=3001 docker compose up --build -d
 > ```
 
 停止:
